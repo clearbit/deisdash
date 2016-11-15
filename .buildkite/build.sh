@@ -8,6 +8,10 @@ TAG=${BUILDKITE_COMMIT::8}
 # image name
 IMAGE=deisdash
 
+# Cleaning up git repo folder just in case it was left from the previuos build
+echo "--- Cleaning up git repo folder ${BUILDKITE_PIPELINE_SLUG}"
+rm -rf /tmp/${BUILDKITE_PIPELINE_SLUG}
+
 cd /tmp
 
 # clone repo
@@ -22,10 +26,6 @@ git checkout ${BUILDKITE_BRANCH}
 # build docker image
 echo -e "\n--- Building :docker: image ${IMAGE}:${TAG}"
 docker build -t ${IMAGE}:${TAG} .
-
-# Cleaning up git repo folder
-echo "--- Cleaning up git repo folder ${BUILDKITE_PIPELINE_SLUG}"
-rm -rf /tmp/${BUILDKITE_PIPELINE_SLUG}
 
 # set ECR docker repository
 if [[ "${BUILDKITE_BRANCH}" = "master" ]]
@@ -50,3 +50,7 @@ docker push ${DOCKER_REPO}/${IMAGE}:${TAG}
 # clean up built docker image
 echo "--- Cleaning up :docker: image ${DOCKER_REPO}/${IMAGE}:${TAG}"
 docker rmi -f ${DOCKER_REPO}/${IMAGE}:${TAG}
+
+# Cleaning up git repo folder
+echo "--- Cleaning up git repo folder ${BUILDKITE_PIPELINE_SLUG}"
+rm -rf /tmp/${BUILDKITE_PIPELINE_SLUG}
