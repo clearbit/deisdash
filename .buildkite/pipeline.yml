@@ -1,0 +1,44 @@
+steps:
+
+# Dev release
+  - name: "Build :docker: image and push it to ECR :rocket:"
+    label: ":console:"
+    command: ".buildkite/build.sh"
+    branches: "!master"
+    agents:
+      role: builder-dev
+  - wait
+  - name: "Deploy :docker: image to Dev Workflow"
+    label: ":console:"
+    command: ".buildkite/deploy.sh"
+    branches: "!master"
+    agents:
+      role: builder-dev
+
+# Staging release
+  - name: "Build :docker: image and push it to ECR :rocket:"
+    label: ":console:"
+    command: ".buildkite/build.sh"
+    branches: "master"
+    agents:
+      role: builder-staging
+  - wait
+  - name: "Deploying :docker: image to Staging Workflow"
+    label: ":console:"
+    command: ".buildkite/deploy.sh"
+    branches: "master"
+    agents:
+      role: deploy-staging
+  - wait
+
+# Production release
+  # wait for unblock by team member
+  - block: "Trigger Production Release :red_button:"
+    branches: "master"
+
+  - name: "Deploying to Production Workflow :rocket:"
+    label: ":console:"
+    command: ".buildkite/deploy.sh"
+    branches: "master"
+    agents:
+      role: deploy-production
